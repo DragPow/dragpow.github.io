@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장기투자를 위한 연평균수익률계산기</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #e0f2f1;
+            color: #004d40;
+        }
+        h1 {
+            color: #00897b;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #4db6ac;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #009688;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #00796b;
+        }
+        #result, #chartContainer, #tableContainer {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #4db6ac;
+            padding: 8px;
+            text-align: right;
+        }
+        th {
+            background-color: #b2dfdb;
+        }
+    </style>
+</head>
+<body>
+    <h1>장기투자를 위한 연평균수익률계산기</h1>
+
+    <div id="calculator">
+        <label for="initialValue">초기투자금 (만원):</label>
+        <input type="number" id="initialValue" placeholder="초기 투자금액을 입력하세요">
+        <label for="monthlyInvestment">월적립금 (만원):</label>
+        <input type="number" id="monthlyInvestment" placeholder="월 투자금액을 입력하세요">
+        <label for="returnRate">연간수익률 (%):</label>
+        <input type="number" id="returnRate" placeholder="연간 수익률을 입력하세요">
+        <label for="years">투자기간 (년):</label>
+        <input type="number" id="years" placeholder="투자 기간을 입력하세요">
+        <button onclick="calculateInvestment()">계산하기</button>
+    </div>
+
+    <div id="result"></div>
+    <div id="chartContainer">
+        <canvas id="investmentChart"></canvas>
+    </div>
+    <div id="tableContainer"></div>
+
+    <script>
+        let myChart;
+
+        function calculateInvestment() {
+            const initialValue = parseFloat(document.getElementById('initialValue').value);
+            const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value);
+            const returnRate = parseFloat(document.getElementById('returnRate').value) / 100;
+            const years = parseInt(document.getElementById('years').value);
+
+            if (initialValue >= 0 && monthlyInvestment >= 0 && returnRate > -1 && years > 0) {
+                let totalInvestment = initialValue;
+                let finalAmount = initialValue;
+                const monthlyRate = Math.pow(1 + returnRate, 1/12) - 1;
+
+                let yearlyData = [{
+                    year: 0,
+                    totalInvestment: initialValue,
+                    profit: 0,
+                    result: initialValue,
+                    returnRate: 0
+                }];
+
+                for (let year = 1; year <= years; year++) {
+                    let yearStartAmount = finalAmount;
+                    for (let month = 0; month < 12; month++) {
+                        finalAmount = finalAmount * (1 + monthlyRate) + monthlyInvestment;
+                        totalInvestment += monthlyInvestment;
+                    }
+                    let yearlyProfit = finalAmount - yearStartAmount - (monthlyInvestment * 12);
+                    let yearlyReturnRate = (yearlyProfit / yearStartAmount) * 100;
+                    yearlyData.push({
+                        year: year,
+                        totalInvestment: totalInvestment,
+                        profit: finalAmount - totalInvestment,
+                        result: finalAmount,
+                        returnRate: yearlyReturnRate
+                    });
+                }
+
+                const totalReturn = ((finalAmount - totalInvestment) / totalInvestment) * 100;
+                const totalInterest = finalAmount - totalInvestment;
+
+                document.getElementById('result').innerHTML = `
+                    <p>총 투자 결과: ${formatAmount(finalAmount)}</p>
+                    <p>총 투자 금액: ${formatAmount(totalInvestment)}</p>
+                    <p>총 수익률: ${totalReturn.toFixed(2)}%</p>
+                    <p>총 이자 수익: ${formatAmount(totalInterest)}</p>
+                `;
+                
+                createChart(yearlyData);
+                createTable(yearlyData);
+            } else {
+                document.getElementById('result').innerText = '유효한 값을 입력해주세요.';
+            }
+        }
+
+        function formatAmount(amount) {
+            return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 }).format(amount.toFixed(2));
+        }
+
+        function createChart(yearlyData) {
+            const ctx = document.getElementById('investmentChart').getContext('2d');
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const labels = yearlyData.map(data => `${data.year}년차`);
+            const initialInvestmentData = yearlyData.map((data, index) => index === 0 ? data.totalInvestment : yearlyData[0].totalInvestment);
+            const additionalInvestmentData = yearlyData.map((data, index) => index === 0 ? 0 : data.totalInvestment - yearlyData[0].totalInvestment);
+            const totalProfitData = yearlyData.map(data => data.profit);
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '총수익',
+                            data: totalProfitData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '추가투자금',
+                            data: additionalInvestmentData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '초기투자금',
+                            data: initialInvestmentData,
+                            backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '금액 (만원)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTable(yearlyData) {
+            const tableContainer = document.getElementById('tableContainer');
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>년도</th>
+                        <th>총투자금액</th>
+                        <th>수익금액</th>
+                        <th>투자결과</th>
+                        <th>수익률</th>
+                    </tr>
+            `;
+
+            yearlyData.forEach(data => {
+                tableHTML += `
+                    <tr>
+                        <td>${data.year}년차</td>
+                        <td>${formatAmount(data.totalInvestment)}</td>
+                        <td>${formatAmount(data.profit)}</td>
+                        <td>${formatAmount(data.result)}</td>
+                        <td>${data.returnRate.toFixed(2)}%</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</table>';
+            tableContainer.innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
