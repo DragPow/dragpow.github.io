@@ -31,7 +31,7 @@
         <label>한 끼 식사 비용 (원)</label>
         <input type="number" id="mealPrice" placeholder="예) 12000" onfocus="this.placeholder=''" onblur="this.placeholder='예) 12000'">
     </div>
-    <button onclick="calculateLuxury()">주제 파악하기</button>
+    <button onclick="calculateLuxury()">사치 등급 확인하기</button>
 
     <div id="result">
         <div id="gradeTitle" class="grade"></div>
@@ -60,23 +60,23 @@
         if (index < 1.5) {
             title.innerText = "🍃 합리적 소비";
             title.style.color = "#27ae60";
-            desc.innerHTML = "당신은 "진짜" 다<br><br>노예 근성으로 자본주의의 유혹을 뿌리친다<br>미래 가치를 생각하는 갓생러.";
+            desc.innerHTML = "매우 건전한 지출입니다<br><br>지갑과 미래를 지키기 위해<br>앞으로도 건전한 지출을 하십시오.";
         } else if (index < 3.5) {
-            title.innerText = "🍱 평범한 인간";
+            title.innerText = "🍱 무난한 일상";
             title.style.color = "#2980b9";
-            desc.innerHTML = "평범한 직장인의 적당한 소비<br><br>걱정마라 아직 통장은 살아 있다<br>일상적인 활력을 얻기에 적당하다";
+            desc.innerHTML = "평범한 직장인의 식사<br><br>큰 부담 없이 즐길 수 있는 수준<br>일상적인 활력을 얻기에 적당합니다";
         } else if (index < 7.0) {
             title.innerText = "💃 주제 파악 미달";
             title.style.color = "#f39c12";
-            desc.innerHTML = "스스로에 대한 보상임?<br><br>오늘만 사는 놈은 그냥 오늘만 산다<br>주말에 라면만 먹으면서 반성하셈";
+            desc.innerHTML = "스스로에 대한 보상입니까?<br><br>귀여운 연봉에 비해 무리를 하셨군요<br>주말에는 라면만 드십시오";
         } else if (index < 12.0) {
-            title.innerText = "⚠️ 통장 박살러";
+            title.innerText = "⚠️ 위험한 사치";
             title.style.color = "#e67e22";
-            desc.innerHTML = "당신은 내일이 없습니까?<br><br>당신의 통장은 울고 있습니다<br>아니, 이미 비명을 지르고 있다";
+            desc.innerHTML = "당신은 내일이 없습니까?<br><br>당신이 웃고 있을 때<br>당신의 통장은 울고 있습니다";
         } else {
             title.innerText = "🚨 파멸적 플렉스";
             title.style.color = "#e74c3c";
-            desc.innerHTML = "사치가 아니라 능지 이슈<br><br>재벌 3세가 아니라면<br>당장 긴축 모드에 돌입해야 됨";
+            desc.innerHTML = "사치가 아니라 범죄 수준<br><br>재벌 3세가 아니라면<br>긴축 모드에 돌입하십시오";
         }
     }
 </script>
